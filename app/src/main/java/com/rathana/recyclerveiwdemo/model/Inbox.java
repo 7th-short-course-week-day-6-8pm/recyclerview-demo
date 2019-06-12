@@ -2,6 +2,7 @@ package com.rathana.recyclerveiwdemo.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.DrawableRes;
 
 public class Inbox implements Parcelable {
 
@@ -10,17 +11,20 @@ public class Inbox implements Parcelable {
     private String name;
     private String content;
     private String date;
+    private @DrawableRes int starIcon;
 
     private String subject;
 
 
     public Inbox() {}
 
-    public Inbox(String contact,String subject, String content, String date) {
+    public Inbox(String contact,String subject, String content,
+                 String date,@DrawableRes int startIcon) {
         this.contact = contact;
         this.subject=subject;
         this.content = content;
         this.date = date;
+        this.starIcon=startIcon;
     }
 
     protected Inbox(Parcel in) {
@@ -30,6 +34,7 @@ public class Inbox implements Parcelable {
         content = in.readString();
         date = in.readString();
         subject = in.readString();
+        starIcon=in.readInt();
     }
 
     @Override
@@ -40,6 +45,7 @@ public class Inbox implements Parcelable {
         dest.writeString(content);
         dest.writeString(date);
         dest.writeString(subject);
+        dest.writeInt(starIcon);
     }
 
     @Override
@@ -107,5 +113,11 @@ public class Inbox implements Parcelable {
         this.date = date;
     }
 
+    public int getStarIcon() {
+        return starIcon;
+    }
 
+    public void setStarIcon(int starIcon) {
+        this.starIcon = starIcon;
+    }
 }
