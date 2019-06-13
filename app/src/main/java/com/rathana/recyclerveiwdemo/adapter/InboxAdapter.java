@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.rathana.recyclerveiwdemo.DetailActivity;
+import com.rathana.recyclerveiwdemo.MainActivity;
 import com.rathana.recyclerveiwdemo.R;
 import com.rathana.recyclerveiwdemo.model.Inbox;
 
@@ -87,7 +88,8 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
         viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                listener.onAdapterItemLongClicked(viewHolder.getAdapterPosition());
+                if(listener!=null)
+                    listener.onAdapterItemLongClicked(viewHolder.getAdapterPosition());
                 return false;
             }
         });
@@ -110,5 +112,9 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
     public interface OnAdapterItemLongClickListener{
 
         void onAdapterItemLongClicked(int position);
+    }
+
+    public void setListener(OnAdapterItemLongClickListener listener){
+        this.listener=listener;
     }
 }

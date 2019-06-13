@@ -29,6 +29,8 @@ implements InboxAdapter.OnAdapterItemLongClickListener {
 
     private int itemPosition;
     public static  final int CODE_REQUEST=99;
+    public static  final int EDIT_REQUEST_CODE=100;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +84,12 @@ implements InboxAdapter.OnAdapterItemLongClickListener {
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.edit:
+                Intent intent=new Intent(this,EditInboxActivity.class);
+                Inbox inbox=inboxList.get(this.itemPosition);
+                Bundle bundle=new Bundle();
+                bundle.putParcelable("data",inbox);
+                intent.putExtras(bundle);
+                startActivityForResult(intent,EDIT_REQUEST_CODE);
                 return  true;
             case R.id.remove:
                 removeRecyclerViewItem();
@@ -109,10 +117,22 @@ implements InboxAdapter.OnAdapterItemLongClickListener {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(CODE_REQUEST==requestCode && resultCode==RESULT_OK){
             //get new Inbox from AddItemActivity
+
             Inbox inbox=data.getParcelableExtra("data");
             //add new Inbox to recycler View
             this.inboxList.add(0,inbox);
             inboxAdapter.notifyItemInserted(0);
+            scroll(0);
         }
+
+        if(EDIT_REQUEST_CODE==requestCode && resultCode==RESULT_OK){
+            Inbox inbox=data.getParcelableExtra("data");
+            this.inboxList.set(this.itemPosition,inbox);
+            inboxAdapter.notifyItemChanged(this.itemPosition);
+        }
+    }
+
+    private void scroll(int position){
+        rvInbox.smoothScrollToPosition(position);
     }
 }
