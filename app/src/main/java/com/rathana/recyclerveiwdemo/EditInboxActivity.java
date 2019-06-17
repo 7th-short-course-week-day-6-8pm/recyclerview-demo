@@ -15,6 +15,7 @@ public class EditInboxActivity extends AppCompatActivity {
     private Button btnSaveChange;
 
     private Inbox inbox;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 

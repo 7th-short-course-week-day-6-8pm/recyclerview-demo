@@ -1,17 +1,23 @@
 package com.rathana.recyclerveiwdemo;
 
 import android.content.Intent;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.paginate.Paginate;
+import com.paginate.recycler.LoadingListItemSpanLookup;
 import com.rathana.recyclerveiwdemo.adapter.InboxAdapter;
 import com.rathana.recyclerveiwdemo.model.Inbox;
 
@@ -32,6 +38,10 @@ implements InboxAdapter.OnAdapterItemLongClickListener {
     public static  final int EDIT_REQUEST_CODE=100;
 
 
+    private boolean isLoading;
+    private int currentPage=1;
+    private  int totalPage =10;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +50,7 @@ implements InboxAdapter.OnAdapterItemLongClickListener {
         btnAddItem=findViewById(R.id.btnAddItem);
 
         initUI();
-        getInboxes();
+        //getInboxes();
 
         btnAddItem.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,6 +61,8 @@ implements InboxAdapter.OnAdapterItemLongClickListener {
                 );
             }
         });
+
+        oldInboxes.addAll(inboxList);
     }
 
     private void initUI(){
@@ -58,10 +70,59 @@ implements InboxAdapter.OnAdapterItemLongClickListener {
         rvInbox.setLayoutManager(new LinearLayoutManager(this));
         inboxAdapter=new InboxAdapter(inboxList,this);
         rvInbox.setAdapter(inboxAdapter);
+
+        isLoading=true;
+        Paginate.with(rvInbox,callback)
+                .setLoadingTriggerThreshold(2)
+                .addLoadingListItem(true)
+                .setLoadingListItemSpanSizeLookup(new LoadingListItemSpanLookup() {
+                    @Override
+                    public int getSpanSize() {
+                        return 1;
+                    }
+                }).build();
+
+        callback.onLoadMore();
     }
 
+
+    private  Paginate.Callbacks callback=new Paginate.Callbacks() {
+        @Override
+        public void onLoadMore() {
+            //get more data
+            isLoading=true;
+            if(isLoading){
+               new Handler().postDelayed(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                getInboxes();
+                            }
+                        }
+                        , 1000);
+
+                //getInboxes();
+                currentPage++;
+            }
+
+            isLoading=false;
+        }
+
+        @Override
+        public boolean isLoading() {
+            return false;
+        }
+
+        @Override
+        public boolean hasLoadedAllItems() {
+            return currentPage==10;
+        }
+    };
+
+
     private void getInboxes(){
-        for(int i=0;i<100;i++){
+       // int i = currentPage*10;
+        for(int i=0;i<10;i++){
             inboxList.add(new Inbox(
                     i+ " admin@gmail.com ",
                     "your subject",
@@ -70,7 +131,7 @@ implements InboxAdapter.OnAdapterItemLongClickListener {
                     R.drawable.ic_star_border_black_24dp
             ));
         }
-
+        //isLoading=true;
         inboxAdapter.notifyDataSetChanged();
     }
 
@@ -135,4 +196,59 @@ implements InboxAdapter.OnAdapterItemLongClickListener {
     private void scroll(int position){
         rvInbox.smoothScrollToPosition(position);
     }
+
+    //create option menu
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.option_menu,menu);
+
+        MenuItem searchItem=menu.findItem(R.id.search);
+        SearchView searchView= (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                doSearch(s);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                return false;
+            }
+        });
+
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                inboxList.clear();
+                inboxList.addAll(oldInboxes);
+                inboxAdapter.notifyDataSetChanged();
+                return false;
+            }
+        });
+        return true;
+    }
+
+
+    List<Inbox> oldInboxes=new ArrayList<>();
+
+    private void doSearch(String s){
+        if(s.isEmpty()){
+            return;
+        }
+
+        inboxList.clear();
+        for (Inbox inbox: oldInboxes){
+            if(inbox.getContact().contains(s)){
+                inboxList.add(inbox);
+            }
+        }
+        if(inboxList.size()==0)
+            Toast.makeText(this, "no data", Toast.LENGTH_SHORT).show();
+        inboxAdapter.notifyDataSetChanged();
+        Log.e("Activity",s);
+    }
+
 }
