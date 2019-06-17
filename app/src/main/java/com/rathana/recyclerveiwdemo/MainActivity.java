@@ -98,8 +98,7 @@ implements InboxAdapter.OnAdapterItemLongClickListener {
                             public void run() {
                                 getInboxes();
                             }
-                        }
-                        , 1000);
+                        }, 1000);
 
                 //getInboxes();
                 currentPage++;
